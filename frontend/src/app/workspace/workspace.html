@@ -1,0 +1,116 @@
+<div class="ws" [class.collapsed]="view().leftCollapsed">
+  <aside class="left">
+    <app-vehicle-list [currentId]="ed.id()" (open)="go($event)" (filterChange)="filterChanged($event)" />
+  </aside>
+
+  <main class="center">
+    <div class="toolbar">
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="toggleLeft()" [title]="(view().leftCollapsed ? 'Show' : 'Hide') + ' vehicle list (L)'">
+        {{ view().leftCollapsed ? '⟩' : '⟨' }}
+      </button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="next(-1)" title="Previous vehicle (← / ↑ without a selected axle, PgUp)">◀</button>
+      <span class="vid" [title]="ed.id() ?? ''">{{ ed.id() ?? 'no vehicle selected' }}</span>
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="next(1)" title="Next vehicle (→ / ↓ without a selected axle, PgDn)">▶</button>
+      <span class="sep"></span>
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="addAtCursor()" [disabled]="!ed.doc()" title="Add axle at cursor (A, or double-click)">+ Axle</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="ed.deleteSelected()" [disabled]="!ed.selected()" title="Delete selected (Del)">Delete</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="ed.toggleType()" [disabled]="!ed.selected()" title="Toggle axle / lift axle (T)">Type</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="ed.snapGt()" [disabled]="!ed.gtGuide()" title="Move the other regular axles onto the GT guide (G)">Snap GT</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="ed.autodepth()" [disabled]="!ed.selected()" title="Fit depth from the points (D)">Depth</button>
+      <span class="sep"></span>
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="ed.undo()" [disabled]="!ed.canUndo()" title="Undo (Ctrl+Z)">↶</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="ed.redo()" [disabled]="!ed.canRedo()" title="Redo (Ctrl+Shift+Z)">↷</button>
+      <button type="button" class="btn btn-sm btn-primary" (click)="ed.save()" [disabled]="!ed.dirty() || ed.saving()" title="Save (Ctrl+S)">Save</button>
+      <span class="save-state small" [class.dirty]="ed.dirty()">
+        {{ ed.saving() ? 'saving…' : ed.dirty() ? 'unsaved changes' : ed.doc() ? 'saved' : '' }}
+      </span>
+      <span class="flex-grow-1"></span>
+      <label class="small d-flex align-items-center gap-1">colour
+        <select class="form-select form-select-sm w-auto" [value]="view().colorBy" (change)="settings.patchView({ colorBy: $any($event.target).value }); $any($event.target).blur()">
+          <option value="x">lateral x</option>
+          <option value="reflectivity">reflectivity</option>
+          <option value="none">none</option>
+        </select>
+      </label>
+      @if (ed.points()) {
+        <label class="small xfilter d-flex align-items-center gap-1" title="Show only points in this lateral range (hides far-side clutter)">
+          x
+          <input type="range" class="form-range" [min]="xRange().min" [max]="xRange().max" step="0.01"
+            [value]="ed.xFilter()?.[0] ?? xRange().min" (input)="setXFilter(0, $event)" />
+          <input type="range" class="form-range" [min]="xRange().min" [max]="xRange().max" step="0.01"
+            [value]="ed.xFilter()?.[1] ?? xRange().max" (input)="setXFilter(1, $event)" />
+          <span class="mono">{{ (ed.xFilter()?.[0] ?? xRange().min).toFixed(2) }}–{{ (ed.xFilter()?.[1] ?? xRange().max).toFixed(2) }}</span>
+        </label>
+      }
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="ed.fitRequest.set(ed.fitRequest() + 1)" title="Fit view (F)">Fit</button>
+      @if (settings.modified()) {
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="settings.saveViewAsDefault()" title="Keep the current view settings (colour, layout, overlays) as default in this browser">
+          Save view as default
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="settings.resetView()" title="Back to the default view settings">↺</button>
+      }
+    </div>
+
+    @if (ed.error()) {
+      <div class="alert alert-danger banner">{{ ed.error() }}</div>
+    }
+    @if (ed.conflict()) {
+      <div class="alert alert-danger banner">
+        The label file was changed elsewhere.
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="ed.reloadFromDisk()">Reload from disk</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="ed.overwrite()">Overwrite with mine</button>
+      </div>
+    }
+    @if (ed.stale()) {
+      <div class="alert alert-warning banner">
+        The PCD changed since these labels were made (it was regenerated). Check the labels, then
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="ed.acceptPcd()">accept the current PCD</button>
+      </div>
+    }
+    @for (w of ed.warnings(); track w) {
+      <div class="alert alert-warning banner">{{ w }}</div>
+    }
+
+    <div class="views">
+      @if (ed.loading()) {
+        <div class="loading">loading…</div>
+      }
+      @if (!ed.id()) {
+        <div class="loading muted">Select a vehicle on the left (or press ↓).</div>
+      }
+      <app-side-view class="side" />
+      <div class="bottom">
+        <div class="tabs">
+          <div class="btn-group btn-group-sm" role="group" aria-label="Bottom view">
+            <button type="button" class="btn btn-sm btn-outline-secondary" [class.active]="view().bottomTab === 'section'" [attr.aria-pressed]="view().bottomTab === 'section'"
+              (click)="settings.patchView({ bottomTab: 'section' })">Section (depth)</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" [class.active]="view().bottomTab === '3d'" [attr.aria-pressed]="view().bottomTab === '3d'"
+              (click)="settings.patchView({ bottomTab: '3d' })">3D</button>
+          </div>
+          <span class="muted small hint">
+            drag circle: move (Shift: keep height) · drag rim/handle: radius · wheel: zoom · drag empty: pan ·
+            1–9 select · arrows: nudge selected, else next/prev vehicle · [ ] radius · L list
+          </span>
+        </div>
+        @if (view().bottomTab === 'section') {
+          <app-section-view class="bview" />
+        } @else {
+          @defer {
+            <app-view-3d class="bview" />
+          } @loading {
+            <div class="bview loading">loading 3D…</div>
+          }
+        }
+      </div>
+    </div>
+  </main>
+
+  <aside class="right">
+    @if (ed.doc()) {
+      <app-review-panel />
+      <app-gt-panel />
+      <app-axle-table />
+      <app-prelabel-panel />
+    }
+  </aside>
+</div>

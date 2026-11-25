@@ -1,0 +1,114 @@
+/*
+ * Bootstrap (CSS only, bundled from npm via angular.json) provides the components. Here:
+ * - Bootstrap's surface colours per theme (data-bs-theme, set by SettingsStore),
+ * - app tokens: aliases of Bootstrap's variables plus the domain colours,
+ * - small app-wide rules. The canvas colours are in core/colors.ts PALETTES.
+ */
+[data-bs-theme='dark'] {
+  --bs-body-bg: #0d1117;
+  --bs-body-bg-rgb: 13, 17, 23;
+  --bs-body-color: #e6edf3;
+  --bs-body-color-rgb: 230, 237, 243;
+  --bs-emphasis-color: #ffffff;
+  --bs-secondary-color: #8b949e;
+  --bs-secondary-bg: #1c2128;
+  --bs-tertiary-bg: #161b22;
+  --bs-border-color: #30363d;
+  --bs-link-color: #58a6ff;
+  --bs-link-hover-color: #79c0ff;
+  --bs-link-color-rgb: 88, 166, 255;
+  --bs-link-hover-color-rgb: 121, 192, 255;
+
+  --bg-sel: #1f2a37;
+  --accent: #58a6ff;
+  --good: #3fb950;
+  --bad: #f85149;
+  --warn: #d29922;
+  --lift: #d2a8ff;
+  --on-status: #0d1117;
+  --canvas-bg: #0d1117;
+  --overlay-bg: rgba(13, 17, 23, 0.75);
+}
+[data-bs-theme='light'] {
+  --bs-body-bg: #f6f8fa;
+  --bs-body-bg-rgb: 246, 248, 250;
+  --bs-body-color: #1f2328;
+  --bs-body-color-rgb: 31, 35, 40;
+  --bs-secondary-color: #656d76;
+  --bs-secondary-bg: #eaeef2;
+  --bs-tertiary-bg: #ffffff;
+  --bs-border-color: #d0d7de;
+
+  --bg-sel: #ddf4ff;
+  --accent: #0969da;
+  --good: #1a7f37;
+  --bad: #cf222e;
+  --warn: #9a6700;
+  --lift: #8250df;
+  --on-status: #ffffff;
+  --canvas-bg: #ffffff;
+  --overlay-bg: rgba(255, 255, 255, 0.85);
+}
+[data-bs-theme] {
+  --bg: var(--bs-body-bg);
+  --bg-raised: var(--bs-tertiary-bg);
+  --bg-hover: var(--bs-secondary-bg);
+  --border: var(--bs-border-color);
+  --fg: var(--bs-body-color);
+  --muted: var(--bs-secondary-color);
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+}
+
+/* compact: all Bootstrap sizes are rem-based */
+html { font-size: 14px; }
+html, body { height: 100%; }
+body { --bs-body-line-height: 1.4; }
+
+/* the neutral button of the app: body text colour, app border, selected = accent */
+.btn-outline-secondary {
+  --bs-btn-color: var(--fg);
+  --bs-btn-border-color: var(--border);
+  --bs-btn-hover-color: var(--fg);
+  --bs-btn-hover-bg: var(--bg-hover);
+  --bs-btn-hover-border-color: var(--muted);
+  --bs-btn-active-color: var(--fg);
+  --bs-btn-active-bg: var(--bg-sel);
+  --bs-btn-active-border-color: var(--accent);
+  --bs-btn-disabled-color: var(--fg);
+  --bs-btn-disabled-border-color: var(--border);
+}
+.btn { white-space: nowrap; }
+
+input[type='number'] { font-family: var(--mono); appearance: textfield; -moz-appearance: textfield; }
+input[type='number']::-webkit-inner-spin-button, input[type='number']::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+code, .mono { font-family: var(--mono); }
+code { color: inherit; }
+kbd {
+  font-family: var(--mono); font-size: 11px; padding: 0 3px; border-radius: 3px;
+  border: 1px solid var(--border); background: none; color: var(--muted);
+}
+.small { font-size: 12px; }
+.muted { color: var(--muted); }
+.warn { color: var(--warn); }
+
+/* side panels */
+.panel-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.panel-head h3 { margin: 0; font-size: 1rem; font-weight: 600; flex: 1; }
+.card p { margin: 4px 0; }
+.table { --bs-table-bg: transparent; --bs-table-color: var(--fg); --bs-table-active-bg: var(--bg-sel); --bs-table-hover-bg: var(--bg-hover); }
+.notice { border: 1px solid var(--warn); border-radius: 5px; padding: 6px 8px; margin-top: 6px; color: var(--warn); }
+
+/* domain badges (vehicle list, GT panel, filter chips) */
+.badge { font-weight: 500; border: 1px solid var(--border); color: var(--muted); }
+.gt-match { color: var(--good); border-color: var(--good); }
+.gt-count_mismatch, .gt-gap_mismatch, .gt-mismatch { color: var(--bad); border-color: var(--bad); }
+.gt-invalid { color: var(--warn); border-color: var(--warn); }
+.l-prelabel_available { color: var(--accent); border-color: var(--accent); }
+.l-prelabeled { color: var(--fg); }
+.l-edited { color: var(--good); }
+.t-lift { color: var(--lift); border-color: var(--lift); }
+.t-warn { color: var(--warn); border-color: var(--warn); }
+.t-bad { color: var(--bad); border-color: var(--bad); }
+.r-ok { color: var(--good); }
+.r-not_ok { color: var(--bad); }
+.r-unreviewed { color: var(--muted); }

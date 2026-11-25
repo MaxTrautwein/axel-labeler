@@ -1,0 +1,92 @@
+<header class="topbar">
+  <div class="dropdown">
+    <button type="button" class="btn btn-sm btn-outline-secondary burger" (click)="menuOpen.set(!menuOpen()); $event.stopPropagation()"
+      title="Menu" aria-label="Menu" [attr.aria-expanded]="menuOpen()">☰</button>
+    <!-- Bootstrap dropdown without its JS: shown/hidden by menuOpen -->
+    <nav class="dropdown-menu" [class.show]="menuOpen()" (click)="menuOpen.set(false)">
+      <a class="dropdown-item" [routerLink]="labelingLink().commands" [queryParams]="labelingLink().queryParams"
+        [class.active]="!onSettings()">Labeling</a>
+      <a class="dropdown-item" routerLink="/settings" [class.active]="onSettings()">Settings</a>
+    </nav>
+  </div>
+  <span class="brand">Axel Labler</span>
+  <span class="muted small">{{ app.config().version ? 'v' + app.config().version : '' }}</span>
+  @for (p of problems(); track p) {
+    <span class="badge t-bad">{{ p }}</span>
+  }
+  <span class="flex-grow-1"></span>
+  <button type="button" class="btn btn-sm btn-outline-secondary" (click)="rescan()"
+    title="Re-read the directories (no file watching on the share)">Rescan</button>
+  @if (app.config().prelabel_enabled) {
+    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="importPrelabels()" [disabled]="busy()"
+      title="Import all prelabel files that are not imported yet">
+      Import prelabels
+    </button>
+  }
+  @if (app.config().export_enabled) {
+    <button type="button" class="btn btn-sm btn-primary" (click)="exportOpen.set(true)">Export…</button>
+  }
+</header>
+
+<div class="content">
+  <router-outlet />
+</div>
+
+@if (exportOpen()) {
+  <!-- Bootstrap modal without its JS -->
+  <div class="modal-backdrop show"></div>
+  <div class="modal d-block" tabindex="-1" (click)="closeExport()">
+    <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header py-2">
+          <h3 class="modal-title fs-6">Export</h3>
+          <button type="button" class="btn-close" aria-label="Close" (click)="closeExport()"></button>
+        </div>
+        @if (exportResult(); as r) {
+          <div class="modal-body">
+            <p>Exported <b>{{ r.manifest.count }}</b> vehicle(s) to</p>
+            <p><code class="path">{{ r.folder }}</code></p>
+            <p class="muted small">manifest.json lists the PCD path and the copied label file of each vehicle.</p>
+            @if (r.manifest.skipped.length) {
+              <p class="warn mb-1">Skipped {{ r.manifest.skipped.length }}:</p>
+              <ul class="small mb-0">
+                @for (s of r.manifest.skipped; track s.vehicle_id) {
+                  <li><code>{{ s.vehicle_id }}</code> – {{ s.reason }}</li>
+                }
+              </ul>
+            }
+          </div>
+          <div class="modal-footer py-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="closeExport()">Close</button>
+          </div>
+        } @else {
+          <div class="modal-body">
+            <p>Copies the label files with this review status into a new export folder and writes a manifest.</p>
+            <label class="d-flex align-items-center gap-2">Review status
+              <select class="form-select form-select-sm w-auto" [value]="exportStatus()"
+                (change)="exportStatus.set($any($event.target).value)">
+                <option value="ok">OK</option>
+                <option value="not_ok">not OK</option>
+                <option value="unreviewed">unreviewed</option>
+              </select>
+            </label>
+          </div>
+          <div class="modal-footer py-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="closeExport()">Cancel</button>
+            <button type="button" class="btn btn-sm btn-primary" (click)="runExport()" [disabled]="busy()">
+              {{ busy() ? 'Exporting…' : 'Export' }}
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  @for (t of notify.toasts(); track t.id) {
+    <div class="toast show {{ t.kind }}" role="status" (click)="notify.dismiss(t.id)">
+      <div class="toast-body">{{ t.text }}</div>
+    </div>
+  }
+</div>

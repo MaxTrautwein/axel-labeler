@@ -1,0 +1,18 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Node / Angular
+node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/src/app/core/generated/
+
+# Local configuration (paths, ids)
+.env
+
+CLAUDE.md
+.idea/

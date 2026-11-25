@@ -1,0 +1,39 @@
+{
+  "name": "axel-labler",
+  "version": "0.1.0",
+  "scripts": {
+    "ng": "ng",
+    "gen:types": "json2ts -i '../docs/schema/*.schema.json' -o src/app/core/generated --cwd ../docs/schema --additionalProperties false --unreachableDefinitions",
+    "prestart": "npm run gen:types",
+    "start": "ng serve",
+    "prebuild": "npm run gen:types",
+    "build": "ng build",
+    "pretest": "npm run gen:types",
+    "test": "ng test --watch=false"
+  },
+  "private": true,
+  "packageManager": "npm@11.19.1",
+  "dependencies": {
+    "@angular/common": "^22.3.0",
+    "@angular/compiler": "^22.3.0",
+    "@angular/core": "^22.3.0",
+    "@angular/forms": "^22.3.0",
+    "@angular/platform-browser": "^22.3.0",
+    "@angular/router": "^22.3.0",
+    "bootstrap": "5.3.9",
+    "rxjs": "~7.8.0",
+    "three": "0.187.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^22.3.0",
+    "@angular/cli": "^22.3.0",
+    "@angular/compiler-cli": "^22.3.0",
+    "@types/three": "0.187.0",
+    "jsdom": "^31.0.0",
+    "json-schema-to-typescript": "16.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "~6.0.2",
+    "vitest": "^5.0.0"
+  }
+}

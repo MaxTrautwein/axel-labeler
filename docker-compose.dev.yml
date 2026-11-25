@@ -1,0 +1,21 @@
+# Development (live reload for API and UI):
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up   → http://127.0.0.1:4200
+# Adds to docker-compose.yml; the api keeps its data volumes and settings from there.
+services:
+  api:
+    environment:
+      PYTHONPATH: /app/src
+    volumes:
+      - ./backend/src:/app/src:ro
+    command: [uvicorn, "axel_labler.server:create_app", --factory, --host, 0.0.0.0, --port, "8000",
+              --reload, --reload-dir, /app/src]
+
+  ui-dev:
+    image: node:24-alpine
+    working_dir: /repo/frontend
+    volumes:
+      - ./:/repo
+    command: sh -c "npm ci --no-audit --no-fund && npm start -- --host 0.0.0.0 --proxy-config proxy.conf.json"
+    ports:
+      - "127.0.0.1:4200:4200"
+    depends_on: [api]

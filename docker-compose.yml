@@ -1,0 +1,36 @@
+# Start: docker compose up -d --build   → http://127.0.0.1:8080      Stop: docker compose down
+# Settings: copy .env.example to .env.   Development: see docker-compose.dev.yml
+name: axel-labler
+
+services:
+  api:
+    build: ./backend
+    environment:
+      AXEL_PCD_DIR: /data/pcd
+      AXEL_PRELABEL_DIR: /data/prelabels
+      AXEL_LABELS_DIR: /data/labels
+      AXEL_EXPORT_DIR: /data/export
+      AXEL_CACHE_DIR: /cache
+      AXEL_PCD_DIR_HOST: ${PCD_DIR}        # host paths, written into export manifests
+      AXEL_EXPORT_DIR_HOST: ${EXPORT_DIR}
+      AXEL_GT_TOLERANCE_M: ${GT_TOLERANCE_M:-0.10}
+      AXEL_MAX_DEPTH_M: ${MAX_DEPTH_M:-0.8}
+    volumes:
+      - ${PCD_DIR}:/data/pcd:ro
+      - ${PRELABEL_DIR}:/data/prelabels:ro
+      - ${LABELS_DIR}:/data/labels
+      - ${EXPORT_DIR}:/data/export
+      - cache:/cache
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${PORT:-8080}:80"
+    depends_on: [api]
+    restart: unless-stopped
+
+volumes:
+  cache:

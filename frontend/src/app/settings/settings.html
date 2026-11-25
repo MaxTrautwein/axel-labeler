@@ -1,0 +1,132 @@
+<div class="page">
+  <div class="form">
+    <h2>Settings</h2>
+    <p class="muted">
+      Defaults for the labeling view, stored in this browser. Changes apply at once. Changes made in the labeling
+      toolbar only last for the session, unless you keep them there with <i>Save view as default</i>.
+    </p>
+
+    <section class="card card-body p-2">
+      <h3>Appearance</h3>
+      <div class="field">
+        <span class="name">Theme</span>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Theme">
+          @for (t of themes; track t) {
+            <button type="button" class="btn btn-sm btn-outline-secondary" [class.active]="d().theme === t" [attr.aria-pressed]="d().theme === t" (click)="set('theme', t)">{{ t }}</button>
+          }
+        </div>
+      </div>
+      <label class="field">
+        <span class="name">Point size</span>
+        <input type="range" class="form-range w-auto" min="0.5" max="3" step="0.25" [value]="d().pointSize" (input)="set('pointSize', num($event))" />
+        <span class="mono">× {{ d().pointSize }}</span>
+      </label>
+    </section>
+
+    <section class="card card-body p-2">
+      <h3>Point colours</h3>
+      <label class="field">
+        <span class="name">Colour by</span>
+        <select class="form-select form-select-sm w-auto" [value]="d().colorBy" (change)="set('colorBy', $any($event.target).value)">
+          <option value="x">lateral x</option>
+          <option value="reflectivity">reflectivity</option>
+          <option value="none">none</option>
+        </select>
+      </label>
+      <div class="field">
+        <span class="name">Colormap</span>
+        <div class="maps">
+          @for (m of colormaps(); track m.name) {
+            <button type="button" class="btn btn-sm btn-outline-secondary map" [class.active]="d().colormap === m.name" (click)="set('colormap', m.name)">
+              <span class="swatch" [style.background]="m.gradient"></span>{{ m.name }}
+            </button>
+          }
+        </div>
+      </div>
+      <label class="field">
+        <span class="name"></span>
+        <input type="checkbox" class="form-check-input m-0" [checked]="d().reverseColormap" (change)="set('reverseColormap', checked($event))" />
+        reversed
+      </label>
+      <p class="muted small">On the light background the bright end of viridis and plasma is hard to see: use turbo or reverse the map.</p>
+    </section>
+
+    @for (ch of channels; track ch.key) {
+      @let sc = d().scales[ch.key];
+      <section class="card card-body p-2">
+        <h3>{{ ch.label }} scale</h3>
+        <div class="field">
+          <span class="name">Range</span>
+          <div class="btn-group btn-group-sm" role="group" aria-label="Range">
+            <button type="button" class="btn btn-sm btn-outline-secondary" [class.active]="sc.mode === 'auto'" (click)="scale(ch.key, { mode: 'auto' })"
+              title="Stretch the colours over this vehicle's values">auto (per vehicle)</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" [class.active]="sc.mode === 'fixed'" (click)="scale(ch.key, { mode: 'fixed' })"
+              title="Same range for every vehicle: a colour always means the same value">fixed (all vehicles)</button>
+          </div>
+        </div>
+        @if (sc.mode === 'auto') {
+          <label class="field">
+            <span class="name">Percentiles</span>
+            <input type="number" class="form-control form-control-sm" min="0" max="100" step="0.5" [value]="sc.lowPct" (change)="scale(ch.key, { lowPct: num($event) })" />
+            –
+            <input type="number" class="form-control form-control-sm" min="0" max="100" step="0.5" [value]="sc.highPct" (change)="scale(ch.key, { highPct: num($event) })" />
+            <span class="muted small">% (values outside get the end colours)</span>
+          </label>
+        } @else {
+          <label class="field">
+            <span class="name">Min – max</span>
+            <input type="number" class="form-control form-control-sm" step="any" [value]="sc.min" (change)="scale(ch.key, { min: num($event) })" />
+            –
+            <input type="number" class="form-control form-control-sm" step="any" [value]="sc.max" (change)="scale(ch.key, { max: num($event) })" />
+            <span class="muted small">{{ ch.unit }}</span>
+          </label>
+        }
+        @if (ch.log) {
+          <label class="field">
+            <span class="name"></span>
+            <input type="checkbox" class="form-check-input m-0" [checked]="sc.log" (change)="scale(ch.key, { log: checked($event) })" />
+            logarithmic <span class="muted small">(keeps the common low values apart when a few parts are very reflective)</span>
+          </label>
+        }
+        @if (stats(); as st) {
+          <p class="muted small">
+            Open vehicle: p1 {{ fmt(ch.key, st[ch.key].p1) }} · median {{ fmt(ch.key, st[ch.key].p50) }} ·
+            p99 {{ fmt(ch.key, st[ch.key].p99) }} · max {{ fmt(ch.key, st[ch.key].max) }} {{ ch.unit }}
+          </p>
+        }
+      </section>
+    }
+
+    <section class="card card-body p-2">
+      <h3>Layout</h3>
+      <label class="field">
+        <input type="checkbox" class="form-check-input m-0" [checked]="d().leftCollapsed" (change)="set('leftCollapsed', checked($event))" />
+        hide the vehicle list <kbd>L</kbd>
+      </label>
+      <label class="field">
+        <input type="checkbox" class="form-check-input m-0" [checked]="d().showPrelabel" (change)="set('showPrelabel', checked($event))" />
+        show the prelabel overlay <kbd>P</kbd>
+      </label>
+      <label class="field">
+        <span class="name">Bottom view</span>
+        <select class="form-select form-select-sm w-auto" [value]="d().bottomTab" (change)="set('bottomTab', $any($event.target).value)">
+          <option value="section">Section (depth)</option>
+          <option value="3d">3D</option>
+        </select>
+      </label>
+    </section>
+
+    <div class="d-flex justify-content-end">
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="resetAll()">Reset all to built-in defaults</button>
+    </div>
+  </div>
+
+  <div class="preview">
+    <div class="preview-head muted small">Preview{{ ed.id() ? ': ' + ed.id() : '' }}</div>
+    @if (ed.points()) {
+      <app-side-view class="pv" />
+    } @else {
+      <div class="empty muted">Open a vehicle in the labeling view to see a preview here.</div>
+    }
+  </div>
+</div>

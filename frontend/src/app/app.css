@@ -1,0 +1,13 @@
+:host { display: flex; flex-direction: column; height: 100vh; }
+.topbar {
+  display: flex; align-items: center; gap: 8px; padding: 6px 12px;
+  border-bottom: 1px solid var(--border); background: var(--bg-raised);
+}
+.brand { font-weight: 600; }
+.burger { font-size: 15px; line-height: 1; padding: 3px 7px; }
+.dropdown-menu { top: calc(100% + 4px); left: 0; }
+.dropdown-item.active { background: var(--bg-sel); color: var(--fg); box-shadow: inset 3px 0 0 var(--accent); }
+.content { flex: 1; min-height: 0; }
+.path { word-break: break-all; }
+.toast { cursor: pointer; border-left: 4px solid var(--accent); }
+.toast.error { border-left-color: var(--bad); }

@@ -1,0 +1,264 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "axel-prelabel.v1.schema.json",
+  "$defs": {
+    "GroundTruth": {
+      "additionalProperties": false,
+      "description": "Weighing-station axle spacing, copied 1:1 from the database.",
+      "properties": {
+        "axle_space": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Verbatim weighing-station database value: ';'-separated centimetres, one value per axle on the ground. null if the database field is empty.",
+          "title": "Axle Space"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Where the value comes from, e.g. 'DB.Table'.",
+          "title": "Source"
+        },
+        "weighing_data_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Id of the database row, for traceability.",
+          "title": "Weighing Data Id"
+        }
+      },
+      "required": [
+        "axle_space",
+        "source",
+        "weighing_data_id"
+      ],
+      "title": "GroundTruth",
+      "type": "object"
+    },
+    "PrelabelAxle": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "axle",
+            "lift_axle"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "y": {
+          "description": "Wheel centre along the vehicle (m).",
+          "title": "Y",
+          "type": "number"
+        },
+        "z": {
+          "description": "Wheel centre height above ground (m).",
+          "exclusiveMinimum": 0,
+          "title": "Z",
+          "type": "number"
+        },
+        "radius": {
+          "description": "Wheel radius (m).",
+          "exclusiveMinimum": 0,
+          "title": "Radius",
+          "type": "number"
+        },
+        "x_min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Lateral start of the wheel set (m).",
+          "title": "X Min"
+        },
+        "x_max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Lateral end of the wheel set (m).",
+          "title": "X Max"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Tool-specific confidence score.",
+          "title": "Score"
+        }
+      },
+      "required": [
+        "type",
+        "y",
+        "z",
+        "radius",
+        "x_min",
+        "x_max",
+        "score"
+      ],
+      "title": "PrelabelAxle",
+      "type": "object"
+    },
+    "PrelabelPcd": {
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "description": "File name of the PCD the prelabel was computed on.",
+          "title": "File",
+          "type": "string"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "SHA-256 of that PCD file, if known.",
+          "title": "Sha256"
+        }
+      },
+      "required": [
+        "file",
+        "sha256"
+      ],
+      "title": "PrelabelPcd",
+      "type": "object"
+    },
+    "PrelabelTool": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "Tool name, e.g. 'my-prelabeler'.",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Tool version, e.g. a git commit.",
+          "title": "Version"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "PrelabelTool",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One prelabel file `<vehicle_id>.prelabel.json`, written by the prelabeler.",
+  "properties": {
+    "format": {
+      "const": "axel-prelabel",
+      "default": "axel-prelabel",
+      "title": "Format",
+      "type": "string"
+    },
+    "format_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Format Version",
+      "type": "integer"
+    },
+    "vehicle_id": {
+      "title": "Vehicle Id",
+      "type": "string"
+    },
+    "pcd": {
+      "$ref": "#/$defs/PrelabelPcd"
+    },
+    "tool": {
+      "$ref": "#/$defs/PrelabelTool"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "ground_truth": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GroundTruth"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "null if no weighing record was found for this vehicle."
+    },
+    "axles": {
+      "description": "Proposed axles, any order.",
+      "items": {
+        "$ref": "#/$defs/PrelabelAxle"
+      },
+      "title": "Axles",
+      "type": "array"
+    },
+    "tool_meta": {
+      "additionalProperties": true,
+      "description": "Free-form tool data (fit parameters, debug values).",
+      "title": "Tool Meta",
+      "type": "object"
+    }
+  },
+  "required": [
+    "format",
+    "format_version",
+    "vehicle_id",
+    "pcd",
+    "tool",
+    "created_at",
+    "ground_truth",
+    "axles",
+    "tool_meta"
+  ],
+  "title": "AxelPrelabel",
+  "type": "object"
+}

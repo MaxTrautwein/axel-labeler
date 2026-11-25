@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "axel-labels-export.v1.schema.json",
+  "$defs": {
+    "ExportFilter": {
+      "additionalProperties": false,
+      "properties": {
+        "review_status": {
+          "default": "ok",
+          "enum": [
+            "unreviewed",
+            "ok",
+            "not_ok"
+          ],
+          "title": "Review Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "review_status"
+      ],
+      "title": "ExportFilter",
+      "type": "object"
+    },
+    "ExportItem": {
+      "additionalProperties": false,
+      "properties": {
+        "vehicle_id": {
+          "title": "Vehicle Id",
+          "type": "string"
+        },
+        "pcd": {
+          "description": "Absolute (host) path of the PCD file.",
+          "title": "Pcd",
+          "type": "string"
+        },
+        "labels": {
+          "description": "Absolute (host) path of the exported label JSON copy.",
+          "title": "Labels",
+          "type": "string"
+        },
+        "axle_count": {
+          "title": "Axle Count",
+          "type": "integer"
+        },
+        "lift_axle_count": {
+          "title": "Lift Axle Count",
+          "type": "integer"
+        },
+        "reviewed_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewed At"
+        }
+      },
+      "required": [
+        "vehicle_id",
+        "pcd",
+        "labels",
+        "axle_count",
+        "lift_axle_count",
+        "reviewed_at"
+      ],
+      "title": "ExportItem",
+      "type": "object"
+    },
+    "ExportRoots": {
+      "additionalProperties": false,
+      "properties": {
+        "pcd": {
+          "description": "Directory of the PCD files (host path).",
+          "title": "Pcd",
+          "type": "string"
+        },
+        "export": {
+          "description": "This export folder (host path).",
+          "title": "Export",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pcd",
+        "export"
+      ],
+      "title": "ExportRoots",
+      "type": "object"
+    },
+    "ExportSkipped": {
+      "additionalProperties": false,
+      "properties": {
+        "vehicle_id": {
+          "title": "Vehicle Id",
+          "type": "string"
+        },
+        "reason": {
+          "enum": [
+            "stale_pcd",
+            "missing_pcd",
+            "invalid"
+          ],
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "vehicle_id",
+        "reason"
+      ],
+      "title": "ExportSkipped",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "`manifest.json` of one export folder.",
+  "properties": {
+    "format": {
+      "const": "axel-labels-export",
+      "default": "axel-labels-export",
+      "title": "Format",
+      "type": "string"
+    },
+    "format_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Format Version",
+      "type": "integer"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "labeler_version": {
+      "title": "Labeler Version",
+      "type": "string"
+    },
+    "filter": {
+      "$ref": "#/$defs/ExportFilter"
+    },
+    "roots": {
+      "$ref": "#/$defs/ExportRoots"
+    },
+    "count": {
+      "title": "Count",
+      "type": "integer"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/ExportItem"
+      },
+      "title": "Items",
+      "type": "array"
+    },
+    "skipped": {
+      "items": {
+        "$ref": "#/$defs/ExportSkipped"
+      },
+      "title": "Skipped",
+      "type": "array"
+    }
+  },
+  "required": [
+    "format",
+    "format_version",
+    "created_at",
+    "labeler_version",
+    "filter",
+    "roots",
+    "count",
+    "items",
+    "skipped"
+  ],
+  "title": "AxelLabelsExport",
+  "type": "object"
+}

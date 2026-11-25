@@ -1,0 +1,343 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "axel-labels.v1.schema.json",
+  "$defs": {
+    "Frame": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "const": "side_view",
+          "default": "side_view",
+          "description": "x lateral (sensor side positive), y longitudinal (vehicle front positive), z up (ground at 0), metres.",
+          "title": "Name",
+          "type": "string"
+        },
+        "transform": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Verbatim copy of `<vehicle_id>.transform.json` written by the transform step, or null if there was none.",
+          "title": "Transform"
+        }
+      },
+      "required": [
+        "name",
+        "transform"
+      ],
+      "title": "Frame",
+      "type": "object"
+    },
+    "GroundTruth": {
+      "additionalProperties": false,
+      "description": "Weighing-station axle spacing, copied 1:1 from the database.",
+      "properties": {
+        "axle_space": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Verbatim weighing-station database value: ';'-separated centimetres, one value per axle on the ground. null if the database field is empty.",
+          "title": "Axle Space"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Where the value comes from, e.g. 'DB.Table'.",
+          "title": "Source"
+        },
+        "weighing_data_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Id of the database row, for traceability.",
+          "title": "Weighing Data Id"
+        }
+      },
+      "required": [
+        "axle_space",
+        "source",
+        "weighing_data_id"
+      ],
+      "title": "GroundTruth",
+      "type": "object"
+    },
+    "LabelAxle": {
+      "additionalProperties": false,
+      "description": "One axle = the visible sensor-side wheel set, a cylinder with its axis parallel to x.",
+      "properties": {
+        "type": {
+          "description": "'axle', or 'lift_axle' for a RAISED lift axle.",
+          "enum": [
+            "axle",
+            "lift_axle"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "y": {
+          "description": "Wheel centre along the vehicle (m).",
+          "title": "Y",
+          "type": "number"
+        },
+        "z": {
+          "description": "Wheel centre height above ground (m).",
+          "exclusiveMinimum": 0,
+          "title": "Z",
+          "type": "number"
+        },
+        "radius": {
+          "description": "Wheel radius (m).",
+          "exclusiveMinimum": 0,
+          "title": "Radius",
+          "type": "number"
+        },
+        "x_min": {
+          "description": "Lateral start of the visible wheel set (m).",
+          "title": "X Min",
+          "type": "number"
+        },
+        "x_max": {
+          "description": "Lateral end of the visible wheel set (m).",
+          "title": "X Max",
+          "type": "number"
+        },
+        "prelabel_index": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Index into prelabel.document.axles this axle was derived from; null if added manually.",
+          "title": "Prelabel Index"
+        }
+      },
+      "required": [
+        "type",
+        "y",
+        "z",
+        "radius",
+        "x_min",
+        "x_max",
+        "prelabel_index"
+      ],
+      "title": "LabelAxle",
+      "type": "object"
+    },
+    "PcdInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "description": "File name of the labeled PCD (`<vehicle_id>.pcd`).",
+          "title": "File",
+          "type": "string"
+        },
+        "sha256": {
+          "description": "SHA-256 of the PCD file the labels refer to.",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "point_count": {
+          "minimum": 0,
+          "title": "Point Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "file",
+        "sha256",
+        "point_count"
+      ],
+      "title": "PcdInfo",
+      "type": "object"
+    },
+    "PrelabelRef": {
+      "additionalProperties": false,
+      "properties": {
+        "imported_at": {
+          "format": "date-time",
+          "title": "Imported At",
+          "type": "string"
+        },
+        "file_sha256": {
+          "description": "SHA-256 of the imported prelabel file.",
+          "title": "File Sha256",
+          "type": "string"
+        },
+        "document": {
+          "additionalProperties": true,
+          "description": "Verbatim content of the imported prelabel file (axel-prelabel format).",
+          "title": "Document",
+          "type": "object",
+          "$ref": "axel-prelabel.v1.schema.json"
+        }
+      },
+      "required": [
+        "imported_at",
+        "file_sha256",
+        "document"
+      ],
+      "title": "PrelabelRef",
+      "type": "object"
+    },
+    "Review": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "default": "unreviewed",
+          "enum": [
+            "unreviewed",
+            "ok",
+            "not_ok"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "comment": {
+          "default": "",
+          "title": "Comment",
+          "type": "string"
+        },
+        "reviewed_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewed At"
+        }
+      },
+      "required": [
+        "status",
+        "comment",
+        "reviewed_at"
+      ],
+      "title": "Review",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One label file `<vehicle_id>.axles.json`.",
+  "properties": {
+    "format": {
+      "const": "axel-labels",
+      "default": "axel-labels",
+      "title": "Format",
+      "type": "string"
+    },
+    "format_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Format Version",
+      "type": "integer"
+    },
+    "vehicle_id": {
+      "title": "Vehicle Id",
+      "type": "string"
+    },
+    "pcd": {
+      "$ref": "#/$defs/PcdInfo"
+    },
+    "frame": {
+      "$ref": "#/$defs/Frame"
+    },
+    "ground_truth": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GroundTruth"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Copied verbatim from the imported prelabel; null if unknown."
+    },
+    "prelabel": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PrelabelRef"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Unchanged reference copy of the imported prelabel."
+    },
+    "axles": {
+      "description": "Ordered front to back (descending y).",
+      "items": {
+        "$ref": "#/$defs/LabelAxle"
+      },
+      "title": "Axles",
+      "type": "array"
+    },
+    "review": {
+      "$ref": "#/$defs/Review"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    },
+    "labeler_version": {
+      "title": "Labeler Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "format",
+    "format_version",
+    "vehicle_id",
+    "pcd",
+    "frame",
+    "ground_truth",
+    "prelabel",
+    "axles",
+    "review",
+    "created_at",
+    "updated_at",
+    "labeler_version"
+  ],
+  "title": "AxelLabels",
+  "type": "object"
+}
